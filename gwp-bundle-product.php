@@ -57,13 +57,9 @@
             if ( 'product' != get_post_type() ) {
                 return;
             }
-            ?>
-            <script type='text/javascript'>
-                jQuery( document ).ready( function() {
-                    jQuery( '.options_group.pricing' ).addClass( 'show_if_gwp_bundle' ).show();
-                });
-            </script>
-            <?php
+            echo '<script type="text/javascript">';
+                echo 'jQuery( ".options_group.pricing" ).addClass( "show_if_gwp_bundle" );';
+            echo '</script>';
         }
 
         add_action( 'admin_footer', 'gwp_bundle_product_js' );
@@ -81,22 +77,18 @@
     /** Bundle product tab content */
     if ( ! function_exists( 'gwp_bundle_product_tab_content' ) ) {
         function gwp_bundle_product_tab_content() {
-            ?>
-            <div id='gwp_bundle_options' class='panel woocommerce_options_panel'>
-                <div class='options_group'>
-                <?php
-                    woocommerce_wp_text_input( [
-                        'id'          => '_gwp_bundle_product_price',
-                        'label'       => __( 'Bundle Price', 'gwp_bundle_product' ),
-                        'placeholder' => '',
-                        'desc_tip'    => 'true',
-                        'description' => __( 'Enter Bundle Product Price.', 'gwp_bundle_product' ),
-                    ] );
-                ?>
-                    <p class="form-field _gwp_bundle_products">
-                        <label for="_gwp_bundle_products"><?php _e( 'Product Select', 'gwp_bundle_product' ); ?></label>
-                        <select class="wc-product-search" id="_gwp_bundle_products" name="_gwp_bundle_products[]" multiple="multiple" data-placeholder="<?php _e( 'Search for a product', 'gwp_bundle_product' ); ?>">
-                        <?php
+            echo '<div id="gwp_bundle_options" class="panel woocommerce_options_panel">';
+                echo '<div class="options_group">';
+                    // woocommerce_wp_text_input( [
+                    //     'id'          => '_gwp_bundle_product_price',
+                    //     'label'       => __( 'Bundle Price', 'gwp_bundle_product' ),
+                    //     'placeholder' => '',
+                    //     'desc_tip'    => 'true',
+                    //     'description' => __( 'Enter Bundle Product Price.', 'gwp_bundle_product' ),
+                    // ] );
+                    echo '<p class="form-field _gwp_bundle_products">';
+                        echo '<label for="_gwp_bundle_products">' . __( 'Product Select', 'gwp_bundle_product' ) . '</label>';
+                        echo '<select class="wc-product-search" id="_gwp_bundle_products" name="_gwp_bundle_products[]" multiple="multiple" data-placeholder="' . __( 'Search for a product', 'gwp_bundle_product' ) . '">';
                             global $post;
                             $product_ids_arr = json_decode( get_post_meta( $post->ID, '_gwp_bundle_products', true ) );
 
@@ -109,12 +101,10 @@
                                     echo '<option value="' . esc_attr( $product->id ) . '" ' . selected( in_array( $product->id, $product_ids_arr ) ) . '>' . esc_html( $product->name ) . '</option>';
                                 }
                             }
-                        ?>
-                        </select>
-                    </p>
-                </div>
-            </div>
-        <?php
+                        echo '</select>';
+                    echo '</p>';
+                echo '</div>';
+            echo '</div>';
         }
 
         add_action( 'woocommerce_product_data_panels', 'gwp_bundle_product_tab_content' );
@@ -136,15 +126,13 @@
     }
 
     /** Show Bundle product price in single product page */
-    if ( ! function_exists( 'gwp_bundle_product_detail' ) ) {
-        function gwp_bundle_product_detail() {
-            global $product;
-            ?>
-            <div>
-                <span><strong> Bundle Price:</strong><?php get_post_meta( $product->id, '_gwp_bundle_product_price', true ) ?></span>
-            </div>
-            <?php
-        }
+    // if ( ! function_exists( 'gwp_bundle_product_detail' ) ) {
+    //     function gwp_bundle_product_detail() {
+    //         global $product;
+    //         echo '<div>';
+    //             echo '<span><strong> Bundle Price:</strong>' . get_post_meta( $product->id, '_gwp_bundle_product_price', true ) . '</span>';
+    //         echo '</div>';
+    //     }
 
-        add_action( 'woocommerce_single_product_summary', 'gwp_bundle_product_detail' );
-    }
+    //     add_action( 'woocommerce_single_product_summary', 'gwp_bundle_product_detail' );
+    // }
