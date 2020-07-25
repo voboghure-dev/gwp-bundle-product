@@ -13,7 +13,26 @@
 
     defined( 'ABSPATH' ) || exit;
 
-    /** Register custom product type */
+
+    if ( ! defined( 'GWP_BUNDLE_PRODUCT_DIR' ) ) {
+        define( 'GWP_BUNDLE_PRODUCT_DIR', plugin_dir_path( __FILE__ ) );
+    }
+
+    if ( ! defined( 'GWP_BUNDLE_PRODUCT_URL' ) ) {
+        define( 'GWP_BUNDLE_PRODUCT_URL', plugin_dir_url( __FILE__ ) );
+    }
+
+    if ( ! defined( 'GWP_BUNDLE_PRODUCT_TEMPLATE_PATH' ) ) {
+        define( 'GWP_BUNDLE_PRODUCT_TEMPLATE_PATH', GWP_BUNDLE_PRODUCT_DIR . 'templates' );
+    }
+
+    if ( ! defined( 'GWP_BUNDLE_PRODUCT_ASSETS_URL' ) ) {
+        define( 'GWP_BUNDLE_PRODUCT_ASSETS_URL', GWP_BUNDLE_PRODUCT_URL . 'assets' );
+    }
+
+    /**
+     * Register custom product type
+     */
     if ( ! function_exists( 'register_gwp_bundle_product_type' ) ) {
         function register_gwp_bundle_product_type() {
             class WC_Product_gwp_bundle extends WC_Product {
@@ -27,7 +46,19 @@
         add_action( 'init', 'register_gwp_bundle_product_type' );
     }
 
-    /** Show product type in dropdown */
+    /**
+     * Load admin theme style
+     */
+    function gwp_bundle_admin_theme() {
+        wp_enqueue_style( 'gwp_bundle_admin_style', GWP_BUNDLE_PRODUCT_ASSETS_URL . '/css/admin.css' );
+        wp_enqueue_script( 'gwp_bundle_admin_script', GWP_BUNDLE_PRODUCT_ASSETS_URL . '/js/admin.js', 'jquery', '1.0.0', true );
+    }
+
+    add_action( 'admin_enqueue_scripts', 'gwp_bundle_admin_theme' );
+
+    /**
+     * Show product type in dropdown
+     */
     if ( ! function_exists( 'add_gwp_bundle_product_type' ) ) {
         function add_gwp_bundle_product_type( $type ) {
             $type['gwp_bundle'] = __( 'Bundle Product', 'gwp_bundle_product' );
@@ -37,7 +68,9 @@
         add_filter( 'product_type_selector', 'add_gwp_bundle_product_type' );
     }
 
-    /** Bundle product tab */
+    /**
+     * Bundle product tab
+     */
     if ( ! function_exists( 'gwp_bundle_product_tab' ) ) {
         function gwp_bundle_product_tab( $tabs ) {
             $tabs['gwp_bundle'] = [
@@ -51,7 +84,9 @@
         add_filter( 'woocommerce_product_data_tabs', 'gwp_bundle_product_tab' );
     }
 
-    /** Keep general price tab */
+    /**
+     * Keep general price tab
+     */
     if ( ! function_exists( 'gwp_bundle_product_js' ) ) {
         function gwp_bundle_product_js() {
             if ( 'product' != get_post_type() ) {
@@ -65,7 +100,9 @@
         add_action( 'admin_footer', 'gwp_bundle_product_js' );
     }
 
-    /** Add to cart for bundle product as like as simple product */
+    /**
+     * Add to cart for bundle product as like as simple product
+     */
     if ( ! function_exists( 'gwp_bundle_add_to_cart' ) ) {
         function gwp_bundle_add_to_cart() {
             wc_get_template( 'single-product/add-to-cart/simple.php' );
@@ -74,43 +111,32 @@
         add_action( 'woocommerce_gwp_bundle_add_to_cart', 'gwp_bundle_add_to_cart' );
     }
 
-    /** Bundle product tab content */
+    /**
+     * Bundle product tab content
+     */
     if ( ! function_exists( 'gwp_bundle_product_tab_content' ) ) {
         function gwp_bundle_product_tab_content() {
-            echo '<div id="gwp_bundle_options" class="panel woocommerce_options_panel">';
-                echo '<div class="options_group">';
-                    // woocommerce_wp_text_input( [
-                    //     'id'          => '_gwp_bundle_product_price',
-                    //     'label'       => __( 'Bundle Price', 'gwp_bundle_product' ),
-                    //     'placeholder' => '',
-                    //     'desc_tip'    => 'true',
-                    //     'description' => __( 'Enter Bundle Product Price.', 'gwp_bundle_product' ),
-                    // ] );
-                    echo '<p class="form-field _gwp_bundle_products">';
-                        echo '<label for="_gwp_bundle_products">' . __( 'Product Select', 'gwp_bundle_product' ) . '</label>';
-                        echo '<select class="wc-product-search" id="_gwp_bundle_products" name="_gwp_bundle_products[]" multiple="multiple" data-placeholder="' . __( 'Search for a product', 'gwp_bundle_product' ) . '">';
-                            global $post;
-                            $product_ids_arr = json_decode( get_post_meta( $post->ID, '_gwp_bundle_products', true ) );
+            ?>
+            <div id="gwp_bundle_options" class="panel woocommerce_options_panel">
+                <div class="options_group">
+                    <a href="#TB_inline?&width=753&height=400&inlineId=gwp-bundle-products" title="Product list" class="thickbox button button-primary" style="margin: 10px;">Add Product</a>
 
-                            $args = [
-                                'type' => 'simple',
-                            ];
-                            $products = wc_get_products( $args );
-                            if ( $products ) {
-                                foreach ( $products as $product ) {
-                                    echo '<option value="' . esc_attr( $product->id ) . '" ' . selected( in_array( $product->id, $product_ids_arr ) ) . '>' . esc_html( $product->name ) . '</option>';
-                                }
-                            }
-                        echo '</select>';
-                    echo '</p>';
-                echo '</div>';
-            echo '</div>';
+                    <div id="gwp-bundle-products" style="display:none;">
+                        <div>
+                            <?php include GWP_BUNDLE_PRODUCT_TEMPLATE_PATH . '/admin/all-products.php'; ?>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <?php
         }
 
         add_action( 'woocommerce_product_data_panels', 'gwp_bundle_product_tab_content' );
     }
 
-    /** Save Bundle product meta data */
+    /**
+     * Save Bundle product meta data
+     */
     if ( ! function_exists( 'save_gwp_bundle_product_meta' ) ) {
         function save_gwp_bundle_product_meta( $post_id ) {
             if ( isset( $_POST['_gwp_bundle_products'] ) ) {
@@ -126,13 +152,19 @@
     }
 
     /** Show Bundle product price in single product page */
-    // if ( ! function_exists( 'gwp_bundle_product_detail' ) ) {
-    //     function gwp_bundle_product_detail() {
-    //         global $product;
-    //         echo '<div>';
-    //             echo '<span><strong> Bundle Price:</strong>' . get_post_meta( $product->id, '_gwp_bundle_product_price', true ) . '</span>';
-    //         echo '</div>';
-    //     }
+    if ( ! function_exists( 'gwp_bundle_product_detail' ) ) {
+        function gwp_bundle_product_detail() {
+            global $product;
+            add_thickbox();
+            ?>
+            <div id="testID">
+                <div>
+                    This is a test
+                </div>
+            </div>
+            <a href="#TB_inline?&width=300&height=400&inlineId=testID" class="thickbox button button-primary">Add Product</a>
+            <?php
+        }
 
-    //     add_action( 'woocommerce_single_product_summary', 'gwp_bundle_product_detail' );
-    // }
+        add_action( 'woocommerce_single_product_summary', 'gwp_bundle_product_detail' );
+    }

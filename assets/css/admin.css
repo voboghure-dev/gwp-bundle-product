@@ -1,0 +1,29 @@
+/**
+    Select Product Box
+ */
+/* #gwp-bundle-products {
+    width: 600px;
+} */
+
+/* .gwp-bundle-product-table {
+    width: 700px !important;
+} */
+
+.gwp-bundle-product-table .column-image,
+.gwp-bundle-product-table .column-type,
+.gwp-bundle-product-table .column-action {
+    width      : 60px;
+    text-align : center;
+}
+
+.gwp-bundle-product-table .column-name {
+    width : 200px;
+}
+.gwp-bundle-product-table .column-price {
+    width : 100px;
+}
+
+.gwp-bundle-product-table .column-image img {
+    width  : 40px;
+    height : auto;
+}
