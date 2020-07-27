@@ -119,13 +119,37 @@
             ?>
             <div id="gwp_bundle_options" class="panel woocommerce_options_panel">
                 <div class="options_group">
-                    <a href="#TB_inline?&width=753&height=400&inlineId=gwp-bundle-products" title="Product list" class="thickbox button button-primary" style="margin: 10px;">Add Product</a>
 
-                    <div id="gwp-bundle-products" style="display:none;">
-                        <div>
-                            <?php include GWP_BUNDLE_PRODUCT_TEMPLATE_PATH . '/admin/all-products.php'; ?>
+                    <div class="gwp_bundle_product_add">
+                        <a href="#TB_inline?&width=753&height=400&inlineId=gwp-bundle-products" title="Product list" class="thickbox button button-primary" style="margin: 10px;">Add Product</a>
+
+                        <div id="gwp-bundle-products" style="display:none;">
+                            <div>
+                                <?php include GWP_BUNDLE_PRODUCT_TEMPLATE_PATH . '/admin/all-products.php'; ?>
+                            </div>
                         </div>
                     </div>
+
+                    <div class="gwp_bundle_product_tab_list">
+                        <?php
+                            global $post;
+                            $product_arr = json_decode( get_post_meta( $post->ID, '_gwp_bundle_products', true ), true );
+                            if ( count( $product_arr ) > 0 ) {
+                                foreach ( $product_arr as $id => $qty ) {
+                                    $product = wc_get_product( $id );
+                                    ?>
+                                        <div class="gwp_bundle_product_tab_info">
+                                        <label for="product_id"><?php echo $product->name; ?></label>
+                                        <input name="product_id[]" type="hidden" value="<?php echo $id; ?>" />
+                                        <input name="product_quantity[]" type="text" value="<?php echo $qty; ?>" />
+                                        <span class="button button-secondary removeBundleProduct">Remove</span>
+                                        </div>
+                                    <?php
+                                }
+                            }
+                        ?>
+                    </div>
+
                 </div>
             </div>
             <?php
@@ -139,19 +163,18 @@
      */
     if ( ! function_exists( 'save_gwp_bundle_product_meta' ) ) {
         function save_gwp_bundle_product_meta( $post_id ) {
-            if ( isset( $_POST['_gwp_bundle_products'] ) ) {
-                $product_ids_json = json_encode( $_POST['_gwp_bundle_products'] );
+            $product_ids = array_combine($_POST['product_id'], $_POST['product_quantity']);
+
+            if ( count( $product_ids ) > 0 ) {
+                $product_ids_json = json_encode( $product_ids );
                 update_post_meta( $post_id, '_gwp_bundle_products', $product_ids_json );
-            }
-            if ( isset( $_POST['_gwp_bundle_product_price'] ) ) {
-                update_post_meta( $post_id, '_gwp_bundle_product_price', sanitize_text_field( $_POST['_gwp_bundle_product_price'] ) );
             }
         }
 
         add_action( 'woocommerce_process_product_meta', 'save_gwp_bundle_product_meta' );
     }
 
-    /** Show Bundle product price in single product page */
+    /** Show Bundle product info in single product page */
     if ( ! function_exists( 'gwp_bundle_product_detail' ) ) {
         function gwp_bundle_product_detail() {
             global $product;

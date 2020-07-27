@@ -30,8 +30,8 @@
             <td class="column-image"><?php echo $product->get_image( 'thumbnail' ); ?></td>
 
             <td class="column-name">
-                <div class="product-name">
-                    <a href="<?php echo $edit_link ?>" target="_blank"><?php echo $product->get_formatted_name(); ?></a>
+                <div class="product-link">
+                    <a href="<?php echo $edit_link ?>" target="_blank" class="product-name"><?php echo $product->get_formatted_name(); ?></a>
                 </div>
                 <div class="product-info">
                     <?php if ( ! $product->is_in_stock() ): ?>
@@ -42,7 +42,7 @@
             <td class="column-price"><?php echo $product->get_price_html(); ?></td>
             <td class="column-type"><?php echo ucfirst( str_replace( '_', ' ', $product->get_type() ) ); ?></td>
             <td class="column-action">
-                <button class="button button-primary addBundleProduct"><?php _e( 'Add', 'gwp_bundle_product' )?></button>
+                <button id="<?php echo $product->get_id(); ?>" class="button button-primary addBundleProduct"><?php _e( 'Add', 'gwp_bundle_product' )?></button>
             </td>
         </tr>
         <?php }?>
