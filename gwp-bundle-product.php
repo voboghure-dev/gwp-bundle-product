@@ -85,22 +85,6 @@
     }
 
     /**
-     * Keep general price tab
-     */
-    if ( ! function_exists( 'gwp_bundle_product_js' ) ) {
-        function gwp_bundle_product_js() {
-            if ( 'product' != get_post_type() ) {
-                return;
-            }
-            echo '<script type="text/javascript">';
-                echo 'jQuery( ".options_group.pricing" ).addClass( "show_if_gwp_bundle" );';
-            echo '</script>';
-        }
-
-        add_action( 'admin_footer', 'gwp_bundle_product_js' );
-    }
-
-    /**
      * Add to cart for bundle product as like as simple product
      */
     if ( ! function_exists( 'gwp_bundle_add_to_cart' ) ) {
@@ -134,15 +118,15 @@
                         <?php
                             global $post;
                             $product_arr = json_decode( get_post_meta( $post->ID, '_gwp_bundle_products', true ), true );
-                            if ( count( $product_arr ) > 0 ) {
+                            if ( ! empty( $product_arr ) && count( $product_arr ) > 0 ) {
                                 foreach ( $product_arr as $id => $qty ) {
                                     $product = wc_get_product( $id );
                                     ?>
                                         <div class="gwp_bundle_product_tab_info">
-                                        <label for="product_id"><?php echo $product->name; ?></label>
-                                        <input name="product_id[]" type="hidden" value="<?php echo $id; ?>" />
-                                        <input name="product_quantity[]" type="text" value="<?php echo $qty; ?>" />
-                                        <span class="button button-secondary removeBundleProduct">Remove</span>
+                                            <label for="product_id"><?php echo $product->name; ?></label>
+                                            <input name="product_id[]" type="hidden" value="<?php echo $id; ?>" />
+                                            <input name="product_quantity[]" type="text" value="<?php echo $qty; ?>" />
+                                            <span class="button button-secondary removeBundleProduct">Remove</span>
                                         </div>
                                     <?php
                                 }
