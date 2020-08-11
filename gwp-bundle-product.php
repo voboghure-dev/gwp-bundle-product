@@ -57,6 +57,15 @@
     add_action( 'admin_enqueue_scripts', 'gwp_bundle_admin_theme' );
 
     /**
+     * Load frontend theme style
+     */
+    function gwp_bundle_frontend_theme() {
+        wp_enqueue_style( 'gwp_bundle_frontend_style', GWP_BUNDLE_PRODUCT_ASSETS_URL . '/css/frontend.css' );
+    }
+
+    add_action( 'wp_enqueue_scripts', 'gwp_bundle_frontend_theme' );
+
+    /**
      * Show product type in dropdown
      */
     if ( ! function_exists( 'add_gwp_bundle_product_type' ) ) {
@@ -89,7 +98,7 @@
      */
     if ( ! function_exists( 'gwp_bundle_add_to_cart' ) ) {
         function gwp_bundle_add_to_cart() {
-            wc_get_template( 'single-product/add-to-cart/simple.php' );
+            wc_get_template( 'single-product/add-to-cart/gwp-bundle-product.php' );
         }
 
         add_action( 'woocommerce_gwp_bundle_add_to_cart', 'gwp_bundle_add_to_cart' );
@@ -166,12 +175,42 @@
             ?>
             <div id="testID">
                 <div>
-                    This is a test
+                    <?php echo GWP_BUNDLE_PRODUCT_TEMPLATE_PATH; ?>
                 </div>
             </div>
             <a href="#TB_inline?&width=300&height=400&inlineId=testID" class="thickbox button button-primary">Add Product</a>
             <?php
         }
 
-        add_action( 'woocommerce_single_product_summary', 'gwp_bundle_product_detail' );
+        // add_action( 'woocommerce_single_product_summary', 'gwp_bundle_product_detail' );
     }
+
+    /**
+     * Override the woocommerce template hierarchy to include plugin template path
+     */
+    function gwp_bundle_product_template( $template, $template_name, $template_path ) {
+        global $woocommerce;
+        $_template = $template;
+        if ( ! $template_path )
+            $template_path = $woocommerce->template_url;
+
+        $plugin_path  = GWP_BUNDLE_PRODUCT_TEMPLATE_PATH . '/woocommerce/';
+
+        // Look within passed path within the theme - this is priority
+        $template = locate_template(
+            array(
+                $template_path . $template_name,
+                $template_name
+                )
+        );
+
+        if( ! $template && file_exists( $plugin_path . $template_name ) )
+            $template = $plugin_path . $template_name;
+
+        if ( ! $template )
+            $template = $_template;
+        // var_dump($template);
+        return $template;
+    }
+
+    add_filter( 'woocommerce_locate_template', 'gwp_bundle_product_template', 1, 3 );
