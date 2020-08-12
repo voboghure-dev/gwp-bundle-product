@@ -1,0 +1,44 @@
+/**
+    All Products Thickbox
+ */
+/* #gwp-bundle-products {
+    width: 600px;
+} */
+
+/* .gwp-bundle-product-table {
+    width: 700px !important;
+} */
+
+.gwp-bundle-product-table .column-image,
+.gwp-bundle-product-table .column-type,
+.gwp-bundle-product-table .column-action {
+    width      : 60px;
+    text-align : center;
+}
+
+.gwp-bundle-product-table .column-name {
+    width : 200px;
+}
+.gwp-bundle-product-table .column-price {
+    width : 100px;
+}
+
+.gwp-bundle-product-table .column-image img {
+    width  : 40px;
+    height : auto;
+}
+
+/**
+ * product_tab_info
+ */
+
+.gwp_bundle_product_tab_info {
+    padding-left: 190px;
+    margin-bottom: 10px;
+}
+.removeBundleProduct{
+    margin-left: 10px !important;
+}
+.gwp_bundle_product_tab_info input[type="text"] {
+    width: 100px !important;
+}

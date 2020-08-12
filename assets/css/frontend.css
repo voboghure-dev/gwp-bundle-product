@@ -1,0 +1,6 @@
+.gwp-bundle-product-items th, .gwp-bundle-product-items td{
+    border-bottom: 1px solid;
+}
+.gwp-bundle-product-item-image {
+    width: 80px;
+}
