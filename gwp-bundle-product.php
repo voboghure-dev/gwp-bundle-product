@@ -94,7 +94,7 @@
     }
 
     /**
-     * Add to cart for bundle product as like as simple product
+     * Custom add-to-cart template for bundle product
      */
     if ( ! function_exists( 'gwp_bundle_add_to_cart' ) ) {
         function gwp_bundle_add_to_cart() {
@@ -188,29 +188,90 @@
     /**
      * Override the woocommerce template hierarchy to include plugin template path
      */
-    function gwp_bundle_product_template( $template, $template_name, $template_path ) {
-        global $woocommerce;
-        $_template = $template;
-        if ( ! $template_path )
-            $template_path = $woocommerce->template_url;
+    if ( ! function_exists( 'gwp_bundle_product_template' ) ) {
+        function gwp_bundle_product_template( $template, $template_name, $template_path ) {
+            global $woocommerce;
+            $_template = $template;
+            if ( ! $template_path )
+                $template_path = $woocommerce->template_url;
 
-        $plugin_path  = GWP_BUNDLE_PRODUCT_TEMPLATE_PATH . '/woocommerce/';
+            $plugin_path  = GWP_BUNDLE_PRODUCT_TEMPLATE_PATH . '/woocommerce/';
 
-        // Look within passed path within the theme - this is priority
-        $template = locate_template(
-            array(
-                $template_path . $template_name,
-                $template_name
-                )
-        );
+            // Look within passed path within the theme - this is priority
+            $template = locate_template(
+                array(
+                    $template_path . $template_name,
+                    $template_name
+                    )
+            );
 
-        if( ! $template && file_exists( $plugin_path . $template_name ) )
-            $template = $plugin_path . $template_name;
+            if( ! $template && file_exists( $plugin_path . $template_name ) )
+                $template = $plugin_path . $template_name;
 
-        if ( ! $template )
-            $template = $_template;
-        // var_dump($template);
-        return $template;
+            if ( ! $template )
+                $template = $_template;
+            // var_dump($template);
+            return $template;
+        }
+
+        add_filter( 'woocommerce_locate_template', 'gwp_bundle_product_template', 1, 3 );
     }
 
-    add_filter( 'woocommerce_locate_template', 'gwp_bundle_product_template', 1, 3 );
+    /**
+     * Cart Content modify for bundle product
+     */
+    if ( ! function_exists( 'gwp_bundle_product_add_cart_item_data' ) ) {
+        function gwp_bundle_product_add_cart_item_data( $cart_item_meta, $product_id ) {
+            $product_arr = json_decode( get_post_meta( $product_id, '_gwp_bundle_products', true ), true );
+                if ( ! empty( $product_arr ) && count( $product_arr ) > 0 ) {
+                    foreach ( $product_arr as $id => $qty ) {
+                        $product = wc_get_product( $id );
+                        $cart_item_meta['gwp_bundle'][$id]['qty'] = $qty;
+                        $cart_item_meta['gwp_bundle'][$id]['name'] = $product->name;
+                    }
+                }
+            return $cart_item_meta;
+        }
+
+        add_filter( 'woocommerce_add_cart_item_data' , 'gwp_bundle_product_add_cart_item_data', 10, 2 );
+    }
+
+    /**
+     *  Display bundle product items name in cart and checkout page
+     */
+    if ( ! function_exists( 'gwp_bundle_product_get_item_data' ) ) {
+        function gwp_bundle_product_get_item_data($item_data, $cart_item) {
+            if ( empty( $cart_item['gwp_bundle'] ) ) {
+                return $item_data;
+            }
+            foreach( $cart_item['gwp_bundle'] as $gwp_bundle ) {
+                $item_data[] = array(
+                    'key' => $gwp_bundle['qty'] . ' x ' . $gwp_bundle['name'],
+                    // 'value' => $gwp_bundle['qty'],
+                    // 'display' => $gwp_bundle['qty'] . ' x ' . $gwp_bundle['name'],
+                );
+            }
+            // print_r($item_data); die();
+            return $item_data;
+        }
+
+        add_filter( 'woocommerce_get_item_data', 'gwp_bundle_product_get_item_data', 10, 2 );
+    }
+
+    /**
+     * Save bundle product items as order item meta data
+     */
+    if ( ! function_exists( 'gwp_bundle_product_item_as_order_item_meta_data' ) ) {
+        function gwp_bundle_product_item_as_order_item_meta_data( $item_data, $cart_item_key, $cart_item, $order ) {
+            if ( empty( $cart_item['gwp_bundle'] ) ) {
+                return $item_data;
+            }
+            foreach( $cart_item['gwp_bundle'] as $gwp_bundle ) {
+                $item_data->add_meta_data( 'Bundle Item', $gwp_bundle['qty'] . ' x ' . $gwp_bundle['name'] );
+            }
+            // print_r($item_data); die();
+            return $item_data;
+        }
+
+        add_filter( 'woocommerce_checkout_create_order_line_item', 'gwp_bundle_product_item_as_order_item_meta_data', 10, 4 );
+    }
